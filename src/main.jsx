@@ -5,13 +5,7 @@ import './index.css'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { Router } from 'react-router-dom'
 
-
-
-
-
-
-
-
+//fuckthis shit
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
