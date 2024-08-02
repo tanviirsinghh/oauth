@@ -1,74 +1,62 @@
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google'
-
-import { GoogleLogin } from "@react-oauth/google"
+import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-
-import { useAsyncError, useNavigate } from 'react-router-dom';
-
-
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
-  const [user,setUser] = useState(null)
-  const [token, setToken]= useState([])
-  const [profile,setProfile] = useState(null)
-  const navigate = useNavigate()
-    
-  const handleLoginSuccess = (Response) => {
-   
+  const [ user, setUser ] = useState([]);
+  const [profile, setProfile] = useState(null);
+  const navigate = useNavigate();
 
-    console.log('Login Success:', Response);
-    setToken(Response.credential)
-    setUser(Response)
-    
+  const handleLoginSuccess = useGoogleLogin({
+
+    onSuccess: (codeResponse) => console.log(codeResponse)
+    ,
    
-  };
+    onError: (error) => console.log('Login Failed:', error)
+    
+});
 
   const handleLoginFailure = (error) => {
-    console.log('Login Failure:', error);
+    console.error('Login Failure:', error);
   };
 
-  useEffect(
-    () => {
-      
-      console.log(token)
-      
-        if (token) {
-            axios
-                .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${token}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        Accept: 'application/json'
-                    }
-                })
-                .then((res) => {
-                    setProfile(res.data);
-                })
-                .catch((err) => console.log(err));
-        }
-    },
-    [ token ]
-);
+  useEffect(() => {
+
+    if (user) {
+      console.log(user.access_token)
+      axios
+      .get(`https:www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
+          headers: {
+              Authorization: `Bearer ${user.access_token}`,
+              Accept: 'application/json'
+          }
+      })
+        .then((res) => {
+          setProfile(res.data);
+          // You can navigate to another page or perform additional actions here
+          // navigate('/profile'); // Example: navigate to profile page
+        })
+        .catch((err) => {
+          console.error('Error fetching user info:', err);
+        });
+    }
+  }, [user, navigate]);
+
   return (
     <>
-    <h2>  login with google</h2>
-   
-     <GoogleLogin
-       onSuccess={handleLoginSuccess} 
-       onError={handleLoginFailure}>
-      
-       </GoogleLogin>
-     {/* <googleLogout/> */}
-
-
-
-
-
-
-   
-    
+      <h2>Login with Google</h2>
+      <button onClick={() => handleLoginSuccess()}>Sign in with Google 🚀 </button>
+      {profile && (
+        <div>
+          <h3>User Profile</h3>
+          <p>Name: {profile.name}</p>
+          <p>Email: {profile.email}</p>
+          <img src={profile.picture} alt="Profile" />
+        </div>
+      )}
     </>
-  )
+  );
 }
 
-export default Login
+export default Login;
